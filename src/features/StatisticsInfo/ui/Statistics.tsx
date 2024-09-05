@@ -3,6 +3,7 @@ import Button from "@shared/ui/components/Button";
 import PercentInfoBlock from "@shared/ui/components/PercentInfoBlock";
 import { StackingModal } from "@features/StackingModal";
 import { useState } from "react";
+import { useAccount } from "wagmi";
 
 const fakeData = [
   {
@@ -25,6 +26,7 @@ const fakeData = [
 
 function Statistics() {
   const [isVisibleStackingModal, setIsVisibleStackingModal] = useState(false);
+  const { address } = useAccount()
   return (
     <>
       <div className="bg-[#A8BBFF0A] p-[40px] rounded-[30px] flex flex-col gap-[30px] items-start">
@@ -39,7 +41,13 @@ function Statistics() {
         </div>
         <div className="w-[190px] max-[576px]:w-full">
           <Button
-            onClick={() => setIsVisibleStackingModal(true)}
+            onClick={() => {
+              if(address){
+                setIsVisibleStackingModal(true)
+              }else{
+                alert("Кошелек не подключен")
+              }
+            }}
             type="button"
             view="primary"
           >

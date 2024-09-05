@@ -5,7 +5,8 @@
             "createStaking": "Застекировать",
             "availableForReceipt":"Доступно к получению",
             "stacking": "Стекирование",
-            "connectedWallet" : "Кошелек подключен"
+            "connectedWallet" : "Кошелек подключен",
+            "notConnectedWallet" : "Кошелек не подключен"
         }
     }
 }

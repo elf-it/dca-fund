@@ -12,6 +12,7 @@
       "@pages/*": ["src/pages/*"],
       "@shared/*": ["src/shared/*"],
       "@features/*": ["src/features/*"]
-    }
+    },
+    "strict": true
   }
 }

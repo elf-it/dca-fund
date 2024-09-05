@@ -25,7 +25,7 @@ function Select({ listItems, cb, defaultIndex = 0 }: ISelect) {
     setSelectedIndex(i);
     closeList();
     if (cb) {
-      cb(item, i);
+      cb(item.value);
     }
   };
 
