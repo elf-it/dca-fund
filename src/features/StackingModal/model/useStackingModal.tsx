@@ -3,7 +3,7 @@ import IError from "@/app/interfaces";
 
 import { type BaseError, useAccount, useReadContracts } from 'wagmi'
 import { usdt, staking } from '@/abi/abi'
-import { bscTestnet } from 'wagmi/chains'
+import { bscTestnet as net } from 'wagmi/chains'
 import { formatEther, parseEther } from 'viem'
 import { waitForTransactionReceipt, writeContract } from 'wagmi/actions';
 import { config } from '@/config'
@@ -24,10 +24,10 @@ export default function useStackingModal() {
   const { data, error: contractError, isPending } = useReadContracts({
     contracts: [{ 
       abi: usdt,
-      address: '0x46C6186573aeD71e6A0C445073cD14dDD47ddA5a',
+      address: import.meta.env.VITE_CONTRACT_USDT,
       functionName: 'balanceOf',
       args: [address || null],
-      chainId: bscTestnet.id,
+      chainId: net.id,
     }
     ]
   })
@@ -36,13 +36,13 @@ export default function useStackingModal() {
   const write = async () => {
     const result = await writeContract(config, {
       abi: usdt,
-      address: '0x46C6186573aeD71e6A0C445073cD14dDD47ddA5a',
+      address: import.meta.env.VITE_CONTRACT_USDT,
       functionName: 'approve',
-      args: ["0xad0B755F4a89966a0954bE6B1Bea59D800c6D09C", parseEther(value)],
+      args: [import.meta.env.VITE_CONTRACT, parseEther(value)],
     })
 
     const transactionReceipt = await waitForTransactionReceipt(config, {
-     chainId: bscTestnet.id, 
+     chainId: net.id, 
      hash: result,
     })
 
@@ -50,13 +50,13 @@ export default function useStackingModal() {
     if(transactionReceipt.status == "success"){
       const buy = await writeContract(config, {
         abi: staking,
-        address: '0xad0B755F4a89966a0954bE6B1Bea59D800c6D09C',
+        address: import.meta.env.VITE_CONTRACT,
         functionName: 'addToPool',
         args: [parseEther(value), BigInt(period)],
       })
 
       const transactionReceiptBuy = await waitForTransactionReceipt(config, {
-        chainId: bscTestnet.id, 
+        chainId: net.id, 
         hash: buy,
       })
 

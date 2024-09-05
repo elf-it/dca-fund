@@ -5,7 +5,7 @@ import Button from "@shared/ui/components/Button";
 
 import { type BaseError, useAccount, useReadContracts } from 'wagmi'
 import { staking } from '@/abi/abi'
-import { bscTestnet } from 'wagmi/chains'
+import { bscTestnet as net } from 'wagmi/chains'
 import { readContract } from 'wagmi/actions'
 import { config } from '@/config'
 import { formatEther } from 'viem'
@@ -30,16 +30,16 @@ const percents = [
   {months: 0, day: 0}, 
   {months: 0, day: 0}, 
   {months: 0, day: 0}, 
-  {months: 6, day: 0.20}, 
+  {months: 3, day: 0.20}, 
   {months: 0, day: 0}, 
   {months: 0, day: 0}, 
-  {months: 8, day: 0.26}, 
+  {months: 6, day: 0.26}, 
   {months: 0, day: 0}, 
   {months: 0, day: 0}, 
   {months: 9, day: 0.30}, 
   {months: 0, day: 0}, 
   {months: 0, day: 0}, 
-  {months: 10, day: 0.33}
+  {months: 12, day: 0.33}
 ]
 
 function Dashboard() {
@@ -51,10 +51,10 @@ function Dashboard() {
   const { data, error, isPending } = useReadContracts({
     contracts: [{ 
       abi: staking,
-      address: '0xad0B755F4a89966a0954bE6B1Bea59D800c6D09C',
+      address: import.meta.env.VITE_CONTRACT,
       functionName: 'getUser',
       args: [address || null],
-      chainId: bscTestnet.id,
+      chainId: net.id,
     }
     ]
   })
@@ -63,38 +63,45 @@ function Dashboard() {
   const getAmounts = async () => {
     const user = getUser?.result
     if(user){
-      await Promise.all(user.map(async (event: any, i: number): Promise<any> => {
+      setUserData(await Promise.all(getUser?.result?.map(async (elem: any, i: any): Promise<any> => {
+        const starttime = new Date(Number(elem.startTime) * 1000);
+        const endtime = new Date((Number(elem.startTime) + (Number(elem.period) * 30 * import.meta.env.VITE_SECONDS_DELAY)) * 1000);
         const result = await readContract(config, {
           abi: staking,
-          address: '0xad0B755F4a89966a0954bE6B1Bea59D800c6D09C',
+          address: import.meta.env.VITE_CONTRACT,
           functionName: 'getUserAmount',
           args: [address || null, BigInt(i)],
-          chainId: bscTestnet.id,
+          chainId: net.id,
         })
-        setAllAmounts(allAmounts + parseFloat(formatEther(result)))
-        let arr: any = [...arrayAllAmounts, parseFloat(formatEther(result))]
-        console.log(arr)
-        setArrayAllAmounts(arr)
-      }))
-      setUserData(getUser?.result?.map((elem: any, i: any) => {
-        const starttime = new Date(Number(elem.startTime) * 1000);
-        const endtime = new Date((Number(elem.startTime) + (Number(elem.period) * 30 * 86400)) * 1000);
-        const addedc:any = added(elem)
+        const payPeriods = await readContract(config, {
+          abi: staking,
+          address: import.meta.env.VITE_CONTRACT,
+          functionName: 'payPeriods',
+          args: [BigInt(elem.period)],
+          chainId: net.id,
+        })
+        if(Number(payPeriods) > Number(elem.withdrawnTime)){
+          const day = (Number(payPeriods) - Number(elem.withdrawnTime)) / import.meta.env.VITE_SECONDS_DELAY
+          if(day >= 1){
+            let sum = parseInt(day.toString()) * (parseFloat(formatEther(elem.investedAmount)) / 100 * percents[Number(elem.period)].day)
+            setAllAmounts(allAmounts + sum)
+          }
+        }
         return{
           number: i + 1,
           data: starttime.getDate() + "." + starttime.getMonth() + "." + starttime.getFullYear(),
           period: starttime.getDate() + "." + starttime.getMonth() + "." + starttime.getFullYear() + " - " + endtime.getDate() + "." + endtime.getMonth() + "." + endtime.getFullYear(),
           sum: formatter.format(parseFloat(formatEther(elem.investedAmount))),
           percent: percents[Number(elem.period)].months,
-          added: "+" + formatter.format(parseFloat(formatEther(arrayAllAmounts[i]))),
+          added: "+" + formatter.format(parseFloat(formatEther(result))),
           withdrawn: formatter.format(parseFloat(formatEther(elem.withdrawnAmount)))
         }
-      }));
+      })));
     }
   }
 
   const added = (elem: any) => {
-    const per = 86400;
+    const per = import.meta.env.VITE_SECONDS_DELAY;
     if(Number(elem.withdrawnTime) <= Number(elem.startTime)){
       return "0"
     }else{

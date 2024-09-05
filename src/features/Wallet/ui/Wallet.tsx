@@ -3,12 +3,45 @@ import MetaMaskImage from "@shared/ui/images/metamask.png";
 import Icon from "@shared/ui/components/Icon";
 import Button from "@shared/ui/components/Button";
 import { useAccount, useDisconnect, useConnect, useChainId } from 'wagmi'
+import { useEffect } from "react";
 
 function Wallet() {
   const { address } = useAccount()
   const { connectors, connect } = useConnect()
   const { disconnect } = useDisconnect()
   const chainId = useChainId()
+
+  const getAML = async () => {
+    if(address){
+      try {
+        const request = await fetch('https://apist.srws.ru/get', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                "Accept": "*/*"
+            },
+            body: JSON.stringify({
+                address
+            })
+        })
+        const result = await request.json()
+        const data = result.data.risk_level
+        if(data == "Medium" || data == "High"){
+          disconnect()
+          alert("Ваш кошелек не прошел проверку AML и был отключен. Подключите другой кошелек.")
+        }
+      } catch (error) {
+          console.log("Error during AML: ", error)
+          return null
+      }
+    }
+  }
+
+  useEffect(() => {
+    if(address){
+      getAML()
+    }
+  }, [address])
 
   return (
     <div className="element-background flex flex-col gap-[15px] items-center">
@@ -51,7 +84,7 @@ function Wallet() {
           connectors.map((connector) => (
             <>
             {connector.name != "Injected" &&
-            <Button type="button" view="primary" key={connector.name} onClick={() => connect({ connector })}>
+            <Button type="button" view="primary" key={connector.name} onClick={() => {connect({ connector })}}>
               {connector.name}
             </Button>
             }

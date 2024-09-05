@@ -1,6 +1,41 @@
 export const staking = [
     {
         inputs: [],
+        name: "countUsers",
+        outputs:
+        [
+            {
+                internalType: "uint256",
+                name: "",
+                type: "uint256"
+            }
+        ],
+        stateMutability: "view",
+        type: "function"
+    },
+    {
+        inputs:
+        [
+            {
+                internalType: "uint256",
+                name: "",
+                type: "uint256"
+            }
+        ],
+        name: "idToUser",
+        outputs:
+        [
+            {
+                internalType: "address",
+                name: "",
+                type: "address"
+            }
+        ],
+        stateMutability: "view",
+        type: "function"
+    },
+    {
+        inputs: [],
         name: "allAmoutInStaking",
         outputs:
             [
@@ -138,6 +173,27 @@ export const staking = [
         name: "addToPool",
         outputs: [],
         stateMutability: "nonpayable",
+        type: "function"
+    },
+    {
+        inputs:
+        [
+            {
+                internalType: "uint256",
+                name: "",
+                type: "uint256"
+            }
+        ],
+        name: "payPeriods",
+        outputs:
+        [
+            {
+                internalType: "uint256",
+                name: "",
+                type: "uint256"
+            }
+        ],
+        stateMutability: "view",
         type: "function"
     }
 ] as const
