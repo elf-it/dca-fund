@@ -65,6 +65,7 @@ function Dashboard() {
   const getAmounts = async () => {
     const user = getUser?.result
     if(user){
+      let aa = 0;
       setUserData(await Promise.all(getUser?.result?.map(async (elem: any, i: any): Promise<any> => {
         const starttime = new Date(Number(elem.startTime) * 1000);
         const endtime = new Date((Number(elem.startTime) + (Number(elem.period) * 30 * import.meta.env.VITE_SECONDS_DELAY)) * 1000);
@@ -86,7 +87,7 @@ function Dashboard() {
           const day = (Number(payPeriods) - Number(elem.withdrawnTime)) / import.meta.env.VITE_SECONDS_DELAY
           if(day >= 1){
             let sum = parseInt(day.toString()) * (parseFloat(formatEther(elem.investedAmount)) / 100 * percents[Number(elem.period)].day)
-            setAllAmounts(allAmounts + sum)
+            aa += sum
           }
         }
         if(elem.payPeriod == 0){
@@ -102,6 +103,7 @@ function Dashboard() {
           withdrawn: formatter.format(parseFloat(formatEther(elem.withdrawnAmount)))
         }
       })));
+      setAllAmounts(aa)
     }
   }
 
