@@ -6,10 +6,11 @@ import Button from "@shared/ui/components/Button";
 import { type BaseError, useAccount, useReadContracts } from 'wagmi'
 import { staking } from '@/abi/abi'
 import { bscTestnet as net } from 'wagmi/chains'
-import { readContract } from 'wagmi/actions'
+import { readContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 import { config } from '@/config'
-import { formatEther } from 'viem'
+import { formatEther, parseEther } from 'viem'
 import { useEffect, useState } from "react";
+import { usdt } from "../../../abi/abi";
 
 const formatter = new Intl.NumberFormat('en', {
   //style: 'currency',
@@ -46,6 +47,7 @@ function Dashboard() {
   const { address } = useAccount()
   const [userData, setUserData] = useState(null)
   const [allAmounts, setAllAmounts] = useState(0)
+  const [isReinvest, setIsReinvest] = useState(false)
   const [arrayAllAmounts, setArrayAllAmounts] = useState([])
 
   const { data, error, isPending } = useReadContracts({
@@ -87,6 +89,9 @@ function Dashboard() {
             setAllAmounts(allAmounts + sum)
           }
         }
+        if(elem.payPeriod == 0){
+          setIsReinvest(true)
+        }
         return{
           number: i + 1,
           data: starttime.getDate() + "." + starttime.getMonth() + "." + starttime.getFullYear(),
@@ -100,12 +105,68 @@ function Dashboard() {
     }
   }
 
-  const added = (elem: any) => {
-    const per = import.meta.env.VITE_SECONDS_DELAY;
-    if(Number(elem.withdrawnTime) <= Number(elem.startTime)){
-      return "0"
+  const withdrawAll = async () => {
+    const payer = await readContract(config, {
+      abi: staking,
+      address: import.meta.env.VITE_CONTRACT,
+      functionName: 'payer'
+    })
+    const balanceOf = await readContract(config, {
+      abi: usdt,
+      address: import.meta.env.VITE_CONTRACT_USDT,
+      functionName: 'balanceOf',
+      args: [payer],
+    })
+    if(Number(formatEther(balanceOf)) > 0){
+      const allowance = await readContract(config, {
+        abi: usdt,
+        address: import.meta.env.VITE_CONTRACT_USDT,
+        functionName: 'allowance',
+        args: [payer, import.meta.env.VITE_CONTRACT]
+      })
+      console.log(Number(formatEther(allowance)))
+      if(Number(formatEther(allowance)) > 0){
+        const withdraw = await writeContract(config, {
+          abi: staking,
+          address: import.meta.env.VITE_CONTRACT,
+          functionName: 'withdrawAll'
+        })
+  
+        const transactionReceipt = await waitForTransactionReceipt(config, {
+          chainId: net.id, 
+          hash: withdraw,
+        })
+  
+        if(transactionReceipt.status == "success"){
+          alert("успешно")
+        }else{
+          alert("ошибка")
+        }
+      }else{
+        alert("Попробуйте позже, не чем платить!") //Придумать че писать
+      }
     }else{
-      return formatter.format(((Number(elem.withdrawnTime) - Number(elem.startTime)) / per) * percents[Number(elem.period)].day)
+      alert("Попробуйте позже, не чем платить!") //Придумать че писать
+    }
+  }
+
+  const reinvestAll = async () => {
+    const reinvestPool = await writeContract(config, {
+      abi: staking,
+      address: import.meta.env.VITE_CONTRACT,
+      functionName: 'reinvestPool',
+      args: [3]
+    })
+
+    const transactionReceipt = await waitForTransactionReceipt(config, {
+      chainId: net.id, 
+      hash: reinvestPool,
+    })
+
+    if(transactionReceipt.status == "success"){
+      alert("успешно")
+    }else{
+      alert("ошибка")
     }
   }
 
@@ -126,10 +187,10 @@ function Dashboard() {
             <div className="text-[20px] text-[#fff] font-[700]">{formatter.format(allAmounts)}</div>
           </div>
           <div className="flex flex-row items-center gap-[15px] max-[787px]:flex-col ">
-            <Button type="button" view="primary">
+            <Button type="button" view="primary" disabled={allAmounts == 0} onClick={withdrawAll}>
               Вывести прибыль
             </Button>
-            <Button type="button" view="secondary">
+            <Button type="button" view="secondary" disabled={!isReinvest} onClick={reinvestAll}>
               Реинвестировать
             </Button>
           </div>
