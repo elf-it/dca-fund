@@ -72,7 +72,7 @@ export default function useStackingModal() {
 
   const onHandleClick = () => {
     setError([]);
-    if (!checkValidInput(value) || Number(value) != 0) {
+    if (!checkValidInput(value) && Number(value) == 0) {
       setError((prev) => [
         ...prev,
         {
@@ -100,6 +100,6 @@ export default function useStackingModal() {
     setValue,
     setPeriod,
     error,
-    onHandleClick,
+    onHandleClick
   };
 }

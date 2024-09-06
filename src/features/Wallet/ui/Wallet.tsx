@@ -76,7 +76,7 @@ function Wallet() {
       <div className="w-full flex flex-col">
         {address ?
           (
-            <Button type="button" view="primary" onClick={() => disconnect()}>
+            <Button type="button" view="primary" key={123} onClick={() => disconnect()}>
               Disconnect
             </Button>
           )
