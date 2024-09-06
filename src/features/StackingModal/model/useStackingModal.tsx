@@ -72,18 +72,17 @@ export default function useStackingModal() {
 
   const onHandleClick = () => {
     setError([]);
-    if (!checkValidInput(value)) {
+    if (!checkValidInput(value) || Number(value) != 0) {
       setError((prev) => [
         ...prev,
         {
           id: 1,
-          message: "Необходимо ввести число",
+          message: "Необходимо ввести число больше нуля",
         },
       ]);
       return;
     }
     setError([]);
-
     if(formatEther(balanceOf?.result) >= value){
       //alert(value + " : " + period);
       write()
