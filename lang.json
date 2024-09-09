@@ -1,12 +1,80 @@
 {
-    "stacking" : {
-        "ru" : {
-            "balance": "Баланс",
-            "createStaking": "Застекировать",
-            "availableForReceipt":"Доступно к получению",
-            "stacking": "Стекирование",
-            "connectedWallet" : "Кошелек подключен",
-            "notConnectedWallet" : "Кошелек не подключен"
-        }
+  "EN": {
+    "stacking": {
+      "balance": "Balance",
+      "createStaking": "Create staking",
+      "availableForReceipt": "Available for receipt",
+      "stacking": "Stacking",
+      "statistic":"Statistic",
+      "connectedWallet": "Wallet is connected",
+      "notConnectedWallet": "Wallet isn't connected",
+      "withdrawProfit" : "Withdraw profit",
+      "reinvest":"Reinvest",
+      "totalyStacked":"Total stacked",
+      "totalAccrued":"Total accrued",
+      "totalOutput":"Total output",
+      "month":"month",
+      "months":"month",
+      "inMnth":"in month",
+      "aboutProject" : "About project",
+      "registrationData" : "Registration data",
+      "instruction" : "Instruction",
+      "warningAboutPossibleRisks" : "Warning about possible risks",
+      "termsOfUseOfTheService":"Terms of use of the service",
+      "chooseStackingPeriod": "Choose stacking period",
+      "upTo":"up to",
+      "agreement":"I agree and accept the Warning about possible risks and the Terms of Use of the service",
+      "date":"Date",
+      "stackingPeriod":"Stacking period",
+      "sum": "Sum",
+      "accrued":"Accrued",
+      "received":"Received",
+      "disconnect":"Disconnect",
+      "success":"Success",
+      "error":"Error",
+      "notEnoughUsdt" : "Not enough USDT",
+      "purchaseError":"Purchase error",
+      "yourWalletHasNotPassed":"Your wallet has not passed AML verification and has been disabled. Connect another wallet."
+    }
+  },
+    "RU": {
+      "stacking": {
+        "balance": "Баланс",
+        "createStaking": "Застекировать",
+        "availableForReceipt": "Доступно к получению",
+        "stacking": "Стекирование",
+        "statistic":"Статистика",
+        "connectedWallet": "Кошелек подключен",
+        "notConnectedWallet": "Кошелек не подключен",
+        "withdrawProfit" : "Вывести прибыль",
+        "reinvest":"Реинвестировать",
+        "totalyStacked":"Всего застекировано",
+        "totalAccrued":"Всего начислено",
+        "totalOutput":"Всего выведено",
+        "month":"месяц",
+        "months":"месяцев",
+        "inMnth":"в мес",
+        "aboutProject" : "О проекте",
+        "registrationData" : "Регистрационные данные",
+        "instruction" : "Инструкция",
+        "warningAboutPossibleRisks" : "Предупреждение о возможных рисках",
+        "termsOfUseOfTheService":"Условия пользования сервисом",
+        "chooseStackingPeriod":"Выберите период стекирования:",
+        "upTo":"до",
+        "agreement":"Я согласен и принимаю Предупреждение о возможных рисках и Условия пользования сервисом",
+        "date":"Дата",
+        "stackingPeriod":"Период стерирования",
+        "sum": "Сумма",
+        "accrued":"Начислено",
+        "received":"Получено",
+        "disconnect":"Отключить",
+        "success":"Успешно",
+        "error":"Ошибка",
+        "notEnoughUsdt" : "Недостаточно USDT",
+        "purchaseError":"Ошибка покупки",
+        "yourWalletHasNotPassed":"Ваш кошелек не прошел проверку AML и был отключен. Подключите другой кошелек."
+
+      }
     }
 }
+

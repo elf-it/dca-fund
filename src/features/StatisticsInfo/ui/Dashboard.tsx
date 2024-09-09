@@ -9,23 +9,17 @@ import { bscTestnet as net } from 'wagmi/chains'
 import { readContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 import { config } from '@/config'
 import { formatEther, parseEther } from 'viem'
-import { useEffect, useState } from "react";
-import { usdt } from "../../../abi/abi";
+import { useContext, useEffect, useState } from "react";
+import { usdt } from "@/abi/abi";
+import { LangContext } from "@/app/context/LangaugeContext";
+import { Bounce, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 const formatter = new Intl.NumberFormat('en', {
   //style: 'currency',
   //currency: 'USDT'
 });
 
-const tableHeader = [
-  "№",
-  "Дата",
-  "Период стерирования",
-  "Сумма",
-  "%",
-  "Начислено",
-  "Получено",
-];
 
 const percents = [
   {months: 0, day: 0}, 
@@ -49,6 +43,7 @@ function Dashboard() {
   const [allAmounts, setAllAmounts] = useState(0)
   const [isReinvest, setIsReinvest] = useState(false)
   const [arrayAllAmounts, setArrayAllAmounts] = useState([])
+  const {language} = useContext(LangContext)
 
   const { data, error, isPending } = useReadContracts({
     contracts: [{ 
@@ -86,17 +81,27 @@ function Dashboard() {
         if(Number(payPeriods) > Number(elem.withdrawnTime)){
           const day = (Number(payPeriods) - Number(elem.withdrawnTime)) / import.meta.env.VITE_SECONDS_DELAY
           if(day >= 1){
-            let sum = parseInt(day.toString()) * (parseFloat(formatEther(elem.investedAmount)) / 100 * percents[Number(elem.period)].day)
-            aa += sum
+            //let sum = parseInt(day.toString()) * (parseFloat(formatEther(elem.investedAmount)) / 100 * percents[Number(elem.period)].day)
+            aa += parseFloat(formatEther(result)) //sum
           }
         }
         if(elem.payPeriod == 0){
           setIsReinvest(true)
         }
+        let std = starttime.getDate().toString()
+        let stm = starttime.getMonth().toString()
+        let etd = endtime.getDate().toString()
+        let etm = endtime.getMonth().toString()
+
+        if(starttime.getDate() < 10) std = '0' + std
+        if(starttime.getMonth() < 10) stm = '0' + stm
+        if(endtime.getDate() < 10) etd = '0' + etd
+        if(endtime.getMonth() < 10) etm = '0' + etm
+
         return{
           number: i + 1,
-          data: starttime.getDate() + "." + starttime.getMonth() + "." + starttime.getFullYear(),
-          period: starttime.getDate() + "." + starttime.getMonth() + "." + starttime.getFullYear() + " - " + endtime.getDate() + "." + endtime.getMonth() + "." + endtime.getFullYear(),
+          data: std + "." + stm + "." + starttime.getFullYear(),
+          period: std + "." + stm + "." + starttime.getFullYear() + " - " + etd + "." + etm + "." + endtime.getFullYear(),
           sum: formatter.format(parseFloat(formatEther(elem.investedAmount))),
           percent: percents[Number(elem.period)].months,
           added: "+" + formatter.format(parseFloat(formatEther(result))),
@@ -140,15 +145,55 @@ function Dashboard() {
         })
   
         if(transactionReceipt.status == "success"){
-          alert("успешно")
+          toast.success(language.stacking.success, {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+            transition: Bounce,
+          });
         }else{
-          alert("ошибка")
+          toast.error(language.stacking.error, {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+            transition: Bounce,
+          });
         }
       }else{
-        alert("Попробуйте позже, не чем платить!") //Придумать че писать
+        toast.error(language.stacking.notEnoughUsdt, {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+          transition: Bounce,
+        });
       }
     }else{
-      alert("Попробуйте позже, не чем платить!") //Придумать че писать
+      toast.error(language.stacking.notEnoughUsdt, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Bounce,
+      });
     }
   }
 
@@ -166,9 +211,29 @@ function Dashboard() {
     })
 
     if(transactionReceipt.status == "success"){
-      alert("успешно")
+      toast.success(language.stacking.success, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Bounce,
+      });
     }else{
-      alert("ошибка")
+      toast.error(language.stacking.error, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Bounce,
+      });
     }
   }
 
@@ -178,22 +243,33 @@ function Dashboard() {
     }
   }, [getUser])
 
+
+const tableHeader = [
+  "№",
+  language.stacking.date,
+  language.stacking.stackingPeriod,
+  language.stacking.sum,
+  "%",
+  language.stacking.accrued,
+  language.stacking.received,
+];
+
   return (
     <>
       <div className="element-background flex flex-col gap-[15px]">
         <div className="flex flex-row items-center justify-between max-[787px]:items-start max-[576px]:flex-col">
           <div>
             <div className="text-[14px] text-[#8296A4]">
-              {lang.stacking.ru.availableForReceipt}
+              {language.stacking.availableForReceipt}
             </div>
-            <div className="text-[20px] text-[#fff] font-[700]">{formatter.format(allAmounts)}</div>
+            <div className="text-[20px] text-[#fff] font-[700]">{formatter.format(allAmounts)} USDT</div>
           </div>
           <div className="flex flex-row items-center gap-[15px] max-[787px]:flex-col ">
             <Button type="button" view="primary" disabled={allAmounts == 0} onClick={withdrawAll}>
-              Вывести прибыль
+              {language.stacking.withdrawProfit}
             </Button>
             <Button type="button" view="secondary" disabled={!isReinvest} onClick={reinvestAll}>
-              Реинвестировать
+              {language.stacking.reinvest}
             </Button>
           </div>
         </div>

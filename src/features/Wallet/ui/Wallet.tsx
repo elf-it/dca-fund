@@ -1,15 +1,19 @@
-import lang from "@/../lang.json";
 import MetaMaskImage from "@shared/ui/images/metamask.png";
 import Icon from "@shared/ui/components/Icon";
 import Button from "@shared/ui/components/Button";
 import { useAccount, useDisconnect, useConnect, useChainId } from 'wagmi'
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
+import { LangContext } from "@/app/context/LangaugeContext";
+import { Bounce, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 function Wallet() {
   const { address } = useAccount()
   const { connectors, connect } = useConnect()
   const { disconnect } = useDisconnect()
   const chainId = useChainId()
+
+  const {language} = useContext(LangContext)
 
   const getAML = async () => {
     if(address){
@@ -28,7 +32,18 @@ function Wallet() {
         const data = result.data.risk_level
         if(data == "Medium" || data == "High"){
           disconnect()
-          alert("Ваш кошелек не прошел проверку AML и был отключен. Подключите другой кошелек.")
+
+          toast.error(language.stacking.yourWalletHasNotPassed, {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+            transition: Bounce,
+          });
         }
       } catch (error) {
           console.log("Error during AML: ", error)
@@ -49,14 +64,17 @@ function Wallet() {
         <div className="bg-[#272B34] h-full w-full rounded-full flex flex-row items-center justify-center">
           <img src={MetaMaskImage} alt="" />
         </div>
-        {address &&
+        {address ?
           <div className="w-[24px] h-[24px] bg-[#73D053] rounded-full flex flex-row items-center justify-center absolute bottom-0 right-0">
             <Icon width={22} color="transparent" name="done" />
           </div>
+          : <div className="w-[24px] h-[24px] bg-[#FF5F5F] rounded-full flex flex-row items-center justify-center absolute bottom-0 right-0">
+          <Icon width={10} color="#fff" name="small-cross" />
+        </div>
         }
       </div>
       <p className="text-[20px] text-[#fff] font-[700]">
-        {address ? lang.stacking.ru.connectedWallet : lang.stacking.ru.notConnectedWallet}
+        {/* {address ? lang.stacking.ru.connectedWallet : lang.stacking.ru.notConnectedWallet} */}
       </p>
       {address &&
       <>
@@ -77,7 +95,7 @@ function Wallet() {
         {address ?
           (
             <Button type="button" view="primary" key={123} onClick={() => disconnect()}>
-              Disconnect
+              {language.stacking.disconnect}
             </Button>
           )
         :

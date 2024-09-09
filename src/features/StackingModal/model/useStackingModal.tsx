@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import IError from "@/app/interfaces";
 
 import { type BaseError, useAccount, useReadContracts } from 'wagmi'
@@ -7,12 +7,17 @@ import { bscTestnet as net } from 'wagmi/chains'
 import { formatEther, parseEther } from 'viem'
 import { waitForTransactionReceipt, writeContract } from 'wagmi/actions';
 import { config } from '@/config'
+import { Bounce, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
+import { LangContext } from "@/app/context/LangaugeContext";
 
 export default function useStackingModal() {
   const inputRef = useRef(null);
   const [value, setValue] = useState("");
   const [period, setPeriod] = useState(3);
   const [error, setError] = useState<IError[]>([]);
+  const [loading,setLoading] = useState(false)
+  const {language} = useContext(LangContext)
 
   const checkValidInput = (val: string) => {
     const  pattern = /^\d+\.?\d*$/;
@@ -46,7 +51,6 @@ export default function useStackingModal() {
      hash: result,
     })
 
-    console.log(transactionReceipt.status)
     if(transactionReceipt.status == "success"){
       const buy = await writeContract(config, {
         abi: staking,
@@ -60,17 +64,39 @@ export default function useStackingModal() {
         hash: buy,
       })
 
-      if(transactionReceiptBuy.status == "success"){
-        alert("успешно")
-      }else{
-        alert("ошибка")
+      if (transactionReceiptBuy.status === "success") {
+        toast.success(language.stacking.success, {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+          transition: Bounce,
+        });
+      } else {
+        toast.error(language.stacking.error, {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+          transition: Bounce,
+        });
       }
+      
     }else{
       console.log("error")
     }
   }
 
-  const onHandleClick = () => {
+  const onHandleClick = async (cb?:() => void) => {
+
     setError([]);
     if (!checkValidInput(value) && Number(value) == 0) {
       setError((prev) => [
@@ -85,9 +111,39 @@ export default function useStackingModal() {
     setError([]);
     if(formatEther(balanceOf?.result) >= value){
       //alert(value + " : " + period);
-      write()
+      try{
+        setLoading(true)
+        await write()
+        setLoading(false)
+        if(cb){
+          cb()
+        }
+      }catch(e){
+        toast.error(language.stacking.notEnoughUsdt, {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+          transition: Bounce,
+        });
+      }
     }else{
-      alert("Недостаточно USDT");
+      setLoading(false)
+      toast.error(language.stacking.purchaseError, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Bounce,
+      });
     }
 
     setValue("");
@@ -100,6 +156,7 @@ export default function useStackingModal() {
     setValue,
     setPeriod,
     error,
-    onHandleClick
+    onHandleClick,
+    loading
   };
 }

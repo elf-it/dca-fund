@@ -4,7 +4,8 @@ import { staking } from '@/abi/abi'
 import { bscTestnet as net } from 'wagmi/chains'
 import { config } from '@/config'
 import { formatEther } from 'viem'
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
+import { LangContext } from '@/app/context/LangaugeContext'
 
 const formatter = new Intl.NumberFormat('en', {
   //style: 'currency',
@@ -14,6 +15,7 @@ const formatter = new Intl.NumberFormat('en', {
 function Statistic() {
   const { address } = useAccount()
   const [allAccrued, setAllAccrued] = useState(0)
+  const {language} = useContext(LangContext)
 
   const allAccruedContract = async () => {
     const payPeriods3 = await readContract(config, {
@@ -79,31 +81,31 @@ function Statistic() {
           if(Number(payPeriods3) > Number(getUser[k].withdrawnTime)){
             const day = (Number(payPeriods3) - Number(getUser[k].withdrawnTime)) / import.meta.env.VITE_SECONDS_DELAY
             if(day >= 1){
-              let sum = parseInt(day.toString()) * (parseFloat(formatEther(getUser[k].investedAmount)) / 100 * 0.2)
-              amount += sum
+              //let sum = parseInt(day.toString()) * (parseFloat(formatEther(getUser[k].investedAmount)) / 100 * 0.2)
+              amount += parseFloat(formatEther(getUserAmount)) //sum
             }
           }
         }else if(Number(getUser[k].period) == 6){
           if(Number(payPeriods6) > Number(getUser[k].withdrawnTime)){
             const day = (Number(payPeriods6) - Number(getUser[k].withdrawnTime)) / import.meta.env.VITE_SECONDS_DELAY
             if(day >= 1){
-              let sum = parseInt(day.toString()) * (parseFloat(formatEther(getUser[k].investedAmount)) / 100 * 0.26)
-              amount += sum
+              //let sum = parseInt(day.toString()) * (parseFloat(formatEther(getUser[k].investedAmount)) / 100 * 0.26)
+              amount += parseFloat(formatEther(getUserAmount)) //sum
             }
           }
         }else if(Number(getUser[k].period) == 9){
           if(Number(payPeriods9) > Number(getUser[k].withdrawnTime)){
             const day = (Number(payPeriods9) - Number(getUser[k].withdrawnTime)) / import.meta.env.VITE_SECONDS_DELAY
             if(day >= 1){
-              let sum = parseInt(day.toString()) * (parseFloat(formatEther(getUser[k].investedAmount)) / 100 * 0.3)
-              amount += sum
+              //let sum = parseInt(day.toString()) * (parseFloat(formatEther(getUser[k].investedAmount)) / 100 * 0.3)
+              amount += parseFloat(formatEther(getUserAmount)) //sum
             }
           }
         }else if(Number(getUser[k].period) == 12){
           const day = (Number(payPeriods12) - Number(getUser[k].withdrawnTime)) / import.meta.env.VITE_SECONDS_DELAY
             if(day >= 1){
-              let sum = parseInt(day.toString()) * (parseFloat(formatEther(getUser[k].investedAmount)) / 100 * 0.36)
-              amount += sum
+              //let sum = parseInt(day.toString()) * (parseFloat(formatEther(getUser[k].investedAmount)) / 100 * 0.36)
+              amount += parseFloat(formatEther(getUserAmount)) //sum
             }
         }
       }
@@ -133,7 +135,7 @@ function Statistic() {
   return (
     <div className="element-background flex max-[787px]:flex-col  max-[1440px]:flex-row max-[1440px]:justify-evenly flex-col gap-[15px] items-center justify-between h-full">
       <div>
-        <p className="text-[44px] text-white font-[700] mb-[-10px]">
+        <p className="text-[44px] text-white font-[700] mb-[-10px] text-center">
           {isPending ?
             "0"
           : 
@@ -150,13 +152,13 @@ function Statistic() {
             </>
           }
         </p>
-        <p className="text-[16px] text-[#8296A4] font-[600]">
-          Всего застекировано
+        <p className="text-[16px] text-[#8296A4] font-[600] text-center ">
+          {language.stacking.totalyStacked}
         </p>
       </div>
 
       <div>
-        <p className="text-[44px] text-white font-[700] mb-[-10px]">
+        <p className="text-[44px] text-white font-[700] mb-[-10px] text-center">
         {isPending ?
             "0"
           : 
@@ -173,11 +175,11 @@ function Statistic() {
             </>
           }
         </p>
-        <p className="text-[16px] text-[#8296A4] font-[600]">Всего начислено</p>
+        <p className="text-[16px] text-[#8296A4] font-[600] text-center">{language.stacking.totalAccrued}</p>
       </div>
 
       <div>
-        <p className="text-[44px] text-white font-[700] mb-[-10px]">
+        <p className="text-[44px] text-white font-[700] mb-[-10px] text-center">
         {isPending ?
             "0"
           : 
@@ -194,7 +196,7 @@ function Statistic() {
             </>
           }
         </p>
-        <p className="text-[16px] text-[#8296A4] font-[600]">Всего выведено</p>
+        <p className="text-[16px] text-[#8296A4] font-[600] text-center">{language.stacking.totalOutput}</p>
       </div>
     </div>
   );

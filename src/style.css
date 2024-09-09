@@ -41,10 +41,17 @@ body {
     overflow-x: hidden;
 }
 
+#root{
+    height: 100%;
+}
+
 .overlay {
     max-width: 1320px;
     width: 100%;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 *::-webkit-scrollbar {
