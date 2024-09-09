@@ -2,16 +2,20 @@ import MetaMaskImage from "@shared/ui/images/metamask.png";
 import Icon from "@shared/ui/components/Icon";
 import Button from "@shared/ui/components/Button";
 import { useAccount, useDisconnect, useConnect, useChainId } from 'wagmi'
-import { useContext, useEffect } from "react";
+import { switchChain } from "wagmi/actions";
+import { useContext, useEffect, useState } from "react";
 import { LangContext } from "@/app/context/LangaugeContext";
 import { Bounce, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
+import { config } from '@/config'
+import  { bscTestnet as net } from "viem/chains"
 
 function Wallet() {
   const { address } = useAccount()
   const { connectors, connect } = useConnect()
   const { disconnect } = useDisconnect()
   const chainId = useChainId()
+  const [curentChain, setCurentChain] = useState("")
 
   const {language} = useContext(LangContext)
 
@@ -52,11 +56,44 @@ function Wallet() {
     }
   }
 
+  const chainText = async () => {
+    for(let i = 0; i < connectors.length; i++){
+      let isAuthorized = await connectors[i].isAuthorized()
+      if(isAuthorized){
+        let ch = await connectors[i].getChainId()
+        
+        if(ch == 56){
+          setCurentChain("mainnet")
+        }else if(ch == 97){
+          setCurentChain("testnet")
+        }else{
+          setCurentChain("undefined")
+        }
+        break
+      }
+    }
+  }
+
+  const isChain = async (connector: any) => {
+    let isAuthorized = await connector.isAuthorized()
+    if(isAuthorized){
+      const conChain = await connector.getChainId()
+      console.log(conChain + " : " + chainId)
+      if(conChain!= chainId){
+        await switchChain(config, {chainId: net.id})
+      }
+    }
+  }
+
   useEffect(() => {
     if(address){
       getAML()
     }
   }, [address])
+
+  useEffect(() => {
+    chainText()
+  })
 
   return (
     <div className="element-background flex flex-col gap-[15px] items-center">
@@ -80,7 +117,7 @@ function Wallet() {
       <>
         <div className="flex flex-row items-center gap-[10px]">
           <p className="text-[16px] text-[#fff]/30">
-          BSC {chainId == 56 ? "mainnet": "testnet"}
+          BSC {curentChain}
           </p>
         </div>
         <div className="flex flex-row items-center gap-[10px]">
@@ -102,7 +139,11 @@ function Wallet() {
           connectors.map((connector) => (
             <>
             {connector.name != "Injected" &&
-            <Button type="button" view="primary" key={connector.name} onClick={() => {connect({ connector })}}>
+            <Button type="button" view="primary" key={connector.name} onClick={() => {
+              connect({ connector }, { onSuccess: () => {
+                isChain(connector)
+              }})
+            }}>
               {connector.name}
             </Button>
             }

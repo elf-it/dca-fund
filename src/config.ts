@@ -1,9 +1,9 @@
 import { http, createConfig } from 'wagmi'
-import { bsc, bscTestnet } from 'wagmi/chains'
+import { bscTestnet } from 'wagmi/chains'
 import { injected, metaMask, walletConnect } from 'wagmi/connectors'
 
 export const config = createConfig({
-  chains: [bsc, bscTestnet],
+  chains: [bscTestnet],
   connectors: [
     injected(),
     walletConnect({
@@ -12,7 +12,7 @@ export const config = createConfig({
     //metaMask(),
   ],
   transports: {
-    [bsc.id]: http(),
+    //[bsc.id]: http(),
     [bscTestnet.id]: http(),
   },
 })

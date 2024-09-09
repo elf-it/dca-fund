@@ -1,11 +1,11 @@
 import { useContext, useRef, useState } from "react";
 import IError from "@/app/interfaces";
 
-import { type BaseError, useAccount, useReadContracts } from 'wagmi'
+import { type BaseError, useAccount, useChainId, useConnect, useReadContracts } from 'wagmi'
 import { usdt, staking } from '@/abi/abi'
 import { bscTestnet as net } from 'wagmi/chains'
 import { formatEther, parseEther } from 'viem'
-import { waitForTransactionReceipt, writeContract } from 'wagmi/actions';
+import { switchChain, waitForTransactionReceipt, writeContract } from 'wagmi/actions';
 import { config } from '@/config'
 import { Bounce, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
@@ -18,6 +18,8 @@ export default function useStackingModal() {
   const [error, setError] = useState<IError[]>([]);
   const [loading,setLoading] = useState(false)
   const {language} = useContext(LangContext)
+  const chainId = useChainId()
+  const { connectors } = useConnect()
 
   const checkValidInput = (val: string) => {
     const  pattern = /^\d+\.?\d*$/;
@@ -95,8 +97,24 @@ export default function useStackingModal() {
     }
   }
 
+  const isChain = async (connector: any) => {
+    let isAuthorized = await connector.isAuthorized()
+    if(isAuthorized){
+      if(await connector.getChainId() != chainId){
+        await switchChain(config, {chainId: net.id})
+      }
+    }
+    return false
+  }
+
   const onHandleClick = async (cb?:() => void) => {
 
+    for(let i = 0; i < connectors.length; i++){
+      let ich = await isChain(connectors[i])
+      if(ich != false){
+        break
+      }
+    }
     setError([]);
     if (!checkValidInput(value) && Number(value) == 0) {
       setError((prev) => [
@@ -119,7 +137,8 @@ export default function useStackingModal() {
           cb()
         }
       }catch(e){
-        toast.error(language.stacking.notEnoughUsdt, {
+        setLoading(false)
+        toast.error(language.stacking.purchaseError, {
           position: "top-right",
           autoClose: 3000,
           hideProgressBar: false,
@@ -133,7 +152,7 @@ export default function useStackingModal() {
       }
     }else{
       setLoading(false)
-      toast.error(language.stacking.purchaseError, {
+      toast.error(language.stacking.notEnoughUsdt, {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
